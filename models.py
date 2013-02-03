@@ -49,7 +49,7 @@ class Producer(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('shop.views.producer', [str(self.id)])
+		return ('coopshop.views.producer', [str(self.id)])
 
 	def __unicode__(self):
 		return self.name
@@ -61,7 +61,7 @@ class Category(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('shop.views.category', [str(self.id)])
+		return ('coopshop.views.category', [str(self.id)])
 
 	class Meta:
 		verbose_name_plural = "Categories"
@@ -166,7 +166,7 @@ class Product(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('shop.views.product', [str(self.id)])
+		return ('coopshop.views.product', [str(self.id)])
 
 	def __unicode__(self):
 		return "%s (%s)" % (self.name, self.producer.name)
@@ -279,7 +279,7 @@ class Order(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('shop.views.order', [str(self.id)])
+		return ('coopshop.views.order', [str(self.id)])
 
 class OrderItem(models.Model):
 	product		= models.ForeignKey(Product)
@@ -391,6 +391,7 @@ class Setting(models.Model):
 
 class AboutPage(models.Model):
 	title		= models.CharField(max_length=128)
+	slug		= models.SlugField()
 	content		= models.TextField(help_text="Page contents.  Html and <a target='_blank' href='http://en.wikipedia.org/wiki/Markdown'>markdown</a> are allowed<br/>To insert an image, attach it to the page and put a reference to it in the page with the following format: ![Alt text][Name] where Alt text is a simple description of the image and Name is the name of the image")
 	defaultPage	= models.BooleanField()
 
@@ -399,7 +400,7 @@ class AboutPage(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('shop.views.about', [self.title])
+		return ('coopshop.views.about', [self.title])
 
 	def save(self):
 		if self.defaultPage:

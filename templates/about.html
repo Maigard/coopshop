@@ -5,8 +5,8 @@
 	<div class="receipt">
                 <h3 style="text-align:center; margin-top:1em;">Learn More</h3>
                 <ul style="padding-left:3em">
-			{% for title in titles %}
-                	<li><a href="/coopshop/about/{{title|urlencode}}">{{title}}</a></li>
+			{% for page in pages %}
+                	<li><a href="{% url coopshop.views.about page.slug %}">{{page.title}}</a></li>
 			{% endfor %}
                 </ul>
 	</div>

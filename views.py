@@ -15,7 +15,7 @@ try:
 	from simplejson import json
 except ImportError:
 	import json
-from shop import models
+from coopshop import models
 import decimal
 import urllib
 import re
@@ -59,7 +59,7 @@ def get_query(query_string, search_fields):
     return query
 
 def index(request):
-	return redirect("https://www.atomiccoop.org/coopshop/categories");
+	return redirect("/categories");
 
 def get_footer():
 	return models.Setting.objects.get(key="Footer Text").value
@@ -333,13 +333,12 @@ def charge(request):
 				orderItem.save()
 				items.append(orderItem)
 		try:
-			if "card-number" in request.POST and request.POST["card-number"] != "4242424242424242":
-				if "card" in request.POST:
-					if request.POST["card"] == "newCard":
-						request.user.get_profile().update_card(request.POST["stripeToken"])
-				else:
-					request.user.get_profile().create_charge_account(request.POST["stripeToken"])
-				order.charge()
+			if "card" in request.POST:
+				if request.POST["card"] == "newCard":
+					request.user.get_profile().update_card(request.POST["stripeToken"])
+			else:
+				request.user.get_profile().create_charge_account(request.POST["stripeToken"])
+			order.charge()
 			del(request.session["cart"])
 			return render_to_response(	"order.html",
 							{
@@ -533,36 +532,36 @@ def about(request, page):
 		if page == "":
 			page = models.AboutPage.objects.get(defaultPage = True)
 		else:
-			page = models.AboutPage.objects.get(title = page)
+			page = models.AboutPage.objects.get(slug = page)
 		page.content += "\n\n" + "\n".join(["[%s]: %s" % (image.name, image.image.url) for image in models.AboutImage.objects.filter(page = page)])
 	except ObjectDoesNotExist:
 		raise Http404
 	return render_to_response( "about.html", {
 							"page": page,
-							"titles": [page.title for page in models.AboutPage.objects.all()],
+							"pages": models.AboutPage.objects.all(),
 							"cycle": models.Cycle.getCurrentCycle(),
 							"footer":get_footer()},
 							 context_instance=RequestContext(request))
 	
 urls = patterns('',
-	url (r'^about/(.*)', about, name="about"),
+	url (r'^about/(.*)', about),
 	url(r'^product/(.*)', product),
 	url(r'^user/(.*)', user),
 	url(r'^producer/(.*)', producer),
 	url(r'^category/(.*)', category),
-	url(r'^categories$', categories, name="categories"),
-	url(r'^producers$', producers, name="producers"),
-	url(r'^signup$', signup, name="signup"),
-	url(r'^search$', search, name="search"),
-	url(r'^order/(.*)', order, name="order"),
+	url(r'^categories$', categories),
+	url(r'^producers$', producers),
+	url(r'^signup$', signup),
+	url(r'^search$', search),
+	url(r'^order/(.*)', order),
 	url(r'^cart', cart, name="cart"),
-	url(r'^charge', charge, name="charge"),
-	url(r'^message$', message, name="message"),
-	url(r'^messageThanks$', messageThanks, name="messageThanks"),
-	url(r'^reports/producer', producerReport, name="producerReport"),
-	url(r'^reports/order', orderReport, name="orderReport"),
-	url(r'^reports/sales', salesReport, name="salesReport"),
+	url(r'^charge', charge),
+	url(r'^message$', message),
+	url(r'^messageThanks$', messageThanks),
+	url(r'^reports/producer', producerReport),
+	url(r'^reports/order', orderReport),
+	url(r'^reports/sales', salesReport),
 	url(r'^clearsession', clearsession),
-	url(r'^logout', logoutView, name="logoutView"),
-	url(r'index', index, name="index")
+	url(r'^logout', logoutView),
+	url(r'^$', index)
 )

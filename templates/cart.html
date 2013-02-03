@@ -54,10 +54,10 @@
                       <td class="bottom" >{{cart.total|floatformat:2}}</td>
                   </tr>
 				</table>
-		<form method="get" action="{% url charge %}">
+		<form method="get" action="{% url coopshop.views.charge %}">
                 	<input type="submit" class="shop" value="Order Now" />
 		</form>
-                <button type="button" onclick="location.href='{% url index %}'" class="cart">Shop More</button>
+                <button type="button" onclick="location.href='{% url coopshop.views.index %}'" class="cart">Shop More</button>
         	</div>
          </div>
 

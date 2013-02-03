@@ -144,7 +144,6 @@ class OrderItemInlineFormSet(forms.models.BaseInlineFormSet):
 		prices = [item.quantity * item.price for item in models.OrderItem.objects.filter(order = self.instance.id)]
 		oldtotal = sum(prices)
 		newtotal = sum([item["quantity"] * item["price"] for item in self.cleaned_data if "DELETE" in item and item["DELETE"] == False])
-		open("/home6/atomicco/django_projects/coopshop/shop/validate.txt", "a").write("inline: %s, %s\n%s: %s\n%s\n%s\n%s\n"%(oldtotal, newtotal, type(self.instance), self.instance, self.cleaned_data, prices, self.instance.id))
 		if self.instance.paid == True and newtotal > oldtotal:
 			raise ValidationError("Can not add to an already charged order. Create a new order")
 		return super(OrderItemInlineFormSet, self).clean()
@@ -261,6 +260,7 @@ class AboutImageInline(AdminImageMixin, admin.StackedInline):
 
 class AboutPageAdmin(admin.ModelAdmin):
 	inlines = [AboutImageInline]
+	prepopulated_fields = {"slug": ("title",)}
 	list_display = ("title", "defaultPage")
 	search_fields = ('title', 'content')
 

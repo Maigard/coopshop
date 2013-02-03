@@ -7,15 +7,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Atomic Cooperative Market</title>
 {% block extraheaders %}{% endblock %}
-<link rel="stylesheet" href="{{ STATIC_URL }}screen.css" type="text/css" media="screen,projection" />
-<!--[if lt IE 8]><link rel="stylesheet" href="{{STATIC_URL}}ie.css" type="text/css" media="screen, projection"><![endif]-->
-<link rel="stylesheet" href="{{ STATIC_URL }}print.css" type="text/css" media="print" />
-<link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui.css" type="text/css"  />
-<link rel="stylesheet" href="{{ STATIC_URL }}atomic.css" type="text/css"  />
+<link rel="stylesheet" href="{{ STATIC_URL }}coopshop/screen.css" type="text/css" media="screen,projection" />
+<!--[if lt IE 8]><link rel="stylesheet" href="{{STATIC_URL}}coopshop/ie.css" type="text/css" media="screen, projection"><![endif]-->
+<link rel="stylesheet" href="{{ STATIC_URL }}coopshop/print.css" type="text/css" media="print" />
+<link rel="stylesheet" href="{{ STATIC_URL }}coopshop/jquery-ui.css" type="text/css"  />
+<link rel="stylesheet" href="{{ STATIC_URL }}coopshop/atomic.css" type="text/css"  />
 {% block extrastyles %}{% endblock %}
-<script type="text/javascript" src="{{ STATIC_URL }}jquery.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}jquery-ui.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}atomic.js"></script>
+<script type="text/javascript">
+cartUrl = "{% url coopshop.views.cart %}";
+</script>
+<script type="text/javascript" src="{{ STATIC_URL }}coopshop/jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}coopshop/jquery-ui.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}coopshop/atomic.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function(){
@@ -58,15 +61,15 @@ $(document).ready(function(){
 	</div>
 <div class="container">	
         <div class="span-6">
-        	<a href="/coopshop"><div id="header"></div></a>
+        	<a href="{% url coopshop.views.index %}"><div id="header"></div></a>
     	</div>
         
       	 	<div class="span-17">
             
 		{% if user.is_authenticated %}
-            	<div id="login-bar">Welcome, {{ user.username }}&nbsp; | &nbsp;<a href='/coopshop/user/{{user.username|urlencode}}'>Your Account</a> | &nbsp; <a href="{% url logoutView %}">Logout</a></div>
+            	<div id="login-bar">Welcome, {{ user.username }}&nbsp; | &nbsp;<a href='{% url coopshop.views.user user.username %}'>Your Account</a> | &nbsp; <a href="{% url coopshop.views.logoutView %}">Logout</a></div>
 		{% else %}
-            	<div id="login-bar"><a href="#" id="login">Log In</a>  &nbsp;|  &nbsp;<a href="{% url signup %}">Register</a></div>
+            	<div id="login-bar"><a href="#" id="login">Log In</a>  &nbsp;|  &nbsp;<a href="{% url coopshop.views.signup %}">Register</a></div>
 		{% endif %}
                 
             </div>
@@ -85,20 +88,20 @@ $(document).ready(function(){
         <hr />
 
             <ul id="nav">
-				<li id="nav-home"><a href="http://www.atomiccoop.org/coopshop/categories">Shop</a></li>
-				<li id="nav-archive"><a href="http://www.atomiccoop.org/coopshop/producers">Producers</a></li>
-				<li id="nav-about"><a href="http://www.atomiccoop.org/coopshop/about">About</a></li>
-				<li id="nav-lab"><a href="http://www.atomiccoop.org/coopshop/message">Send us a Message</a></li>
+				<li id="nav-home"><a href="{% url coopshop.views.categories %}">Shop</a></li>
+				<li id="nav-archive"><a href="{% url coopshop.views.producers %}">Producers</a></li>
+				<li id="nav-about"><a href="{% url coopshop.views.about "" %}">About</a></li>
+				<li id="nav-lab"><a href="{% url coopshop.views.message %}">Send us a Message</a></li>
 				{% if user.is_staff %}
-					<li id="nav-admin"><a href="/coopshop/admin">Admin</a></li>
+					<li id="nav-admin"><a href="/admin">Admin</a></li>
 					{% if user|in_group:"Producers,Admins" %}
-					<li id="nav-admin"><a href="/coopshop/reports/producer">Producer Report</a></li>
+					<li id="nav-admin"><a href="{% url coopshop.views.producerReport %}">Producer Report</a></li>
 					{% endif %}
 					{% if user|in_group:"Packers,Admins" %}
-					<li id="nav-admin"><a href="/coopshop/reports/order">Order Report</a></li>
+					<li id="nav-admin"><a href="{% url coopshop.views.orderReport %}">Order Report</a></li>
 					{% endif %}
 					{% if user|in_group:"Admins" %}
-					<li id="nav-admin"><a href="/coopshop/reports/sales">Sales Report</a></li>
+					<li id="nav-admin"><a href="{% url coopshop.views.salesReport %}">Sales Report</a></li>
 					{% endif %}
 				{% endif %}
 			</ul>
@@ -106,7 +109,7 @@ $(document).ready(function(){
       	<div class="span-17" >
 
 		{% block breadcrumb %}
-		<a href="/coopshop/">Categories</a>
+		<a href="{% url coopshop.views.categories %}">Categories</a>
 		{% for crumb in breadcrumbs %}
 		&gt; <a href="{{ crumb.get_absolute_url }}">{{crumb.name}}</a>
 		{% endfor %}
@@ -120,7 +123,7 @@ $(document).ready(function(){
    		<div class="span-7 last">
    		{% block search %}
    		<div class="receipt">
-			<form action="/coopshop/search" method="GET">
+			<form action="{% url coopshop.views.search %}" method="GET">
 				<input type="text" name="q">
 				<input type="submit" value="Search">
 			</form>
@@ -170,7 +173,7 @@ $(document).ready(function(){
                       <td id="total" >{{request.session.cart.total|floatformat:2}}</td>
                   </tr>
 				</table>
-                <form method="GET" action="{% url cart %}">
+                <form method="GET" action="{% url coopshop.views.cart %}">
                 <input type="submit" class="order" value="Order Now">
                	</form>
         	</div>
