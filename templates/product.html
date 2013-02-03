@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load markup %}
+{% load thumbnail %}
+{% block content %}
+		<div class="span-16">
+			<div class="frame">
+			{% thumbnail product.get_image "140x90" as img %}
+                	<div class="feature"><img src="{{ MEDIA_URL }}{{img}}" /></div>
+			{% endthumbnail %}
+                	<div class="bin-header">	
+                        <div class="product"><strong>Item: <a href="{{product.get_absolute_url}}">{{product.name}}</a></strong></div>
+                        <div class="amt-per"><strong>${{product.get_price|floatformat:2}} {% if product.size %}{{product.size|floatformat}} {{product.unit}}{% endif %}</strong></div><br />
+                        <div class="producer"><strong>Producer: <a href="{{product.producer.get_absolute_url}}">{{product.producer.name}}</a></strong></div>
+                    </div>
+                	<div class="description"><p>{{product.description|markdown}}</p></div>
+			{% if product.unlimitedQuantity or product.get_remaining > 0 %}
+				{% if not product.unlimitedQuantity %}
+					<div class="order-date"><strong>Order before {{product.get_orderByDate}}</strong></div><br />
+					<strong>{{product.get_remaining}} currently in stock</strong>
+				{% endif %}
+				<form action="/coopshop/order/" method="post">
+				{% csrf_token %}
+				<div class="add-button"><button type="submit" class="add">Add</button></div>
+				<div class="quantity-box"><input type="text" name="quantity" value="1"  /></div>
+				<input type="hidden" name="productId" value="{{product.id}}">
+				<input type="hidden" name="action" value="setOrderItem">
+				</form>
+			{% else %}
+				<strong>Sorry, this item is currently out of stock</strong>
+			{% endif %}
+             </div>      
+         </div>
+         
+
+{% endblock %}
+       		

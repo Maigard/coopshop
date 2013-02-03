@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block breadcrumb %}{% endblock %}
+{% block content %}
+		{% for producer in producers %}
+     		<div class="span-4">
+        		<div class="bin">
+				<a href="{{producer.get_absolute_url}}">
+                			<div class="feature">
+						{% thumbnail producer.image "140x90" as img %}
+						<img src="{{ img.url }}" />
+						{% endthumbnail %}
+					</div>
+                			<h3>{{producer.name}}</h3>
+				</a>
+                	</div>
+       		 </div>
+		{% endfor %}
+{% endblock %}

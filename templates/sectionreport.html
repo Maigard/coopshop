@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block breadcrumb %}{% endblock %}
+{% block receipt %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+	<form method="POST">
+	{% csrf_token %}
+	{{queryForm}}
+	<input type="submit">
+	</form>
+	{% for section in sections %}
+	<div class="bin">
+	<table>
+		<tr>
+			{% if sectionHeader %}
+			<td rowspan="999" style="width: 200px">
+				{% for line in section.sectionHeader %}
+					{{line}}<br />
+				{% endfor %}
+			</td>
+			{% endif %}
+			{% for header in section.columnHeaders %}
+				<th>{{header}}</th>
+			{% endfor %}
+		</tr>
+		{% for row in section.entries %}
+		<tr>
+			{% for entry in row %}
+				<td>{{entry}}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	{% endfor %}
+{% endblock %}
+
+       		
+

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+{% load markup %}
+{% load thumbnail %}
+		{% block toppagination %}
+		<div class="pagination">
+		    <span class="step-links">
+		        {% if products.has_previous %}
+		            <a href="?page={{ products.previous_page_number }}">previous</a>
+		        {% endif %}
+		
+		        <span class="current">
+		            Page {{ products.number }} of {{ products.paginator.num_pages }}.
+		        </span>
+		
+		        {% if products.has_next %}
+		            <a href="?page={{ products.next_page_number }}">next</a>
+		        {% endif %}
+		    </span>
+		</div>
+		{% endblock toppagination %}
+		<div class="span-17">
+		 {% for product in products %}
+        		<div class="bin">
+			{% thumbnail product.get_image "140x90" as img %}
+                	<div class="feature"><img src="{{MEDIA_URL}}{{img}}" /></div>
+			{% endthumbnail %}
+                	<div class="bin-header">
+                    	<div class="producer"><strong>Producer: <a href="{{ product.producer.get_absolute_url }}">{{product.producer.name}}</a></strong></div>	
+                        <div class="product"><strong>Item: <a href="{{product.get_absolute_url}}">{{product.name}}</a></strong></div>
+                    </div>
+                	<div class="description"><p>{{product.description|markdown|truncatewords_html:50}}</p></div>
+			<div class="amt-per"><strong>${{product.get_price|floatformat:2}} {% if product.size %}/ {% if product.size != 1%}{{product.size|floatformat}} {% endif %}{{product.unit}}{% endif %}</strong></div><br />
+			{% if product.unlimitedQuantity or product.get_remaining > 0 %}
+				{% if not product.unlimitedQuantity %}
+					<div class="order-date"><strong>Order before {{product.get_orderByDate}}</strong></div><br />
+					<strong> {{product.get_remaining}} currently in stock </strong>
+				{% endif %}
+				<form action="/coopshop/cart/" method="post">
+				{% csrf_token %}
+				<div class="add-button"><button type="submit" class="add">Add</button></div>
+				<div class="quantity-box"><input type="text" name="quantity" value="1" class="short" /></div>
+				<input type="hidden" name="productId" value="{{product.id}}">
+				<input type="hidden" name="action" value="setOrderItem">
+				</form>
+			{% else %}
+				<strong>Sorry, this item is currently out of stock</strong>
+			{% endif %}
+                    </div>
+                    {% empty %}
+			<div class='bin'><h2>Unfortunately, there are no products left this cycle, check back after {{cycle.date}}</h2></div>
+                    {% endfor %}
+         </div>
+	{% block bottompagination %}
+	<div class="pagination">
+	    <span class="step-links">
+		{% if products.has_previous %}
+		    <a href="?page={{ products.previous_page_number }}">previous</a>
+		{% endif %}
+
+		<span class="current">
+		    Page {{ products.number }} of {{ products.paginator.num_pages }}.
+		</span>
+
+		{% if products.has_next %}
+		    <a href="?page={{ products.next_page_number }}">next</a>
+		{% endif %}
+	    </span>
+	</div>
+	{% endblock bottompagination %}
+
+{% endblock %}

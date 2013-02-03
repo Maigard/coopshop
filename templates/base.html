@@ -1,0 +1,189 @@
+{% load markup %}
+{% load in_group %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Atomic Cooperative Market</title>
+{% block extraheaders %}{% endblock %}
+<link rel="stylesheet" href="{{ STATIC_URL }}screen.css" type="text/css" media="screen,projection" />
+<!--[if lt IE 8]><link rel="stylesheet" href="{{STATIC_URL}}ie.css" type="text/css" media="screen, projection"><![endif]-->
+<link rel="stylesheet" href="{{ STATIC_URL }}print.css" type="text/css" media="print" />
+<link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui.css" type="text/css"  />
+<link rel="stylesheet" href="{{ STATIC_URL }}atomic.css" type="text/css"  />
+{% block extrastyles %}{% endblock %}
+<script type="text/javascript" src="{{ STATIC_URL }}jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}jquery-ui.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}atomic.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function(){
+{% for id,item in request.session.cart.items.items %}
+	updateOrder({{id}}, {{item.quantity}}, "{{item.description}}", {{item.price}});
+{% endfor %}
+});
+</script>
+
+<!--[if !IE 7]>
+	<style type="text/css">
+		#wrap {display:table;height:100%}
+	</style>
+<![endif]-->
+{% block extrascripts %}{% endblock %}
+
+</head>
+
+
+<body>
+<div id="wrap">
+	<div id="main">
+
+	<div id="dialog" title="Login"><form id="loginForm" method="post" action="{% url django.contrib.auth.views.login %}">
+		{% csrf_token %}
+		<table>
+		<tr>
+		    <td>Email:</td>
+		    <td><div class="long"><input type="text" name="username" /></div></td>
+		</tr>
+		<tr>
+		    <td>Password:</td>
+		    <td><div class="long"><input type="password" name="password" /></div></td>
+		</tr>
+		</table>
+		<a href="{% url django.contrib.auth.views.password_reset %}">Forgot your password?</a>
+		<input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+		<input type="hidden" name="next" />
+		</form>
+	</div>
+<div class="container">	
+        <div class="span-6">
+        	<a href="/coopshop"><div id="header"></div></a>
+    	</div>
+        
+      	 	<div class="span-17">
+            
+		{% if user.is_authenticated %}
+            	<div id="login-bar">Welcome, {{ user.username }}&nbsp; | &nbsp;<a href='/coopshop/user/{{user.username|urlencode}}'>Your Account</a> | &nbsp; <a href="{% url logoutView %}">Logout</a></div>
+		{% else %}
+            	<div id="login-bar"><a href="#" id="login">Log In</a>  &nbsp;|  &nbsp;<a href="{% url signup %}">Register</a></div>
+		{% endif %}
+                
+            </div>
+
+        <div class="span-12">
+
+        	<div id="tag"><p>Providing the Elements of Healthy Living</p></div>
+
+    	</div>
+
+<div class="cycle-message">
+		Next Cycle ends on: <strong>{{cycle.date}}</strong><br>
+		delivery on: <strong>{{cycle.delivery}}</strong>
+	</div>
+
+        <hr />
+
+            <ul id="nav">
+				<li id="nav-home"><a href="http://www.atomiccoop.org/coopshop/categories">Shop</a></li>
+				<li id="nav-archive"><a href="http://www.atomiccoop.org/coopshop/producers">Producers</a></li>
+				<li id="nav-about"><a href="http://www.atomiccoop.org/coopshop/about">About</a></li>
+				<li id="nav-lab"><a href="http://www.atomiccoop.org/coopshop/message">Send us a Message</a></li>
+				{% if user.is_staff %}
+					<li id="nav-admin"><a href="/coopshop/admin">Admin</a></li>
+					{% if user|in_group:"Producers,Admins" %}
+					<li id="nav-admin"><a href="/coopshop/reports/producer">Producer Report</a></li>
+					{% endif %}
+					{% if user|in_group:"Packers,Admins" %}
+					<li id="nav-admin"><a href="/coopshop/reports/order">Order Report</a></li>
+					{% endif %}
+					{% if user|in_group:"Admins" %}
+					<li id="nav-admin"><a href="/coopshop/reports/sales">Sales Report</a></li>
+					{% endif %}
+				{% endif %}
+			</ul>
+
+      	<div class="span-17" >
+
+		{% block breadcrumb %}
+		<a href="/coopshop/">Categories</a>
+		{% for crumb in breadcrumbs %}
+		&gt; <a href="{{ crumb.get_absolute_url }}">{{crumb.name}}</a>
+		{% endfor %}
+		{% endblock %}
+
+		{% block content %}{% endblock %}
+
+        </div>
+
+{% block receipt %}
+   		<div class="span-7 last">
+   		{% block search %}
+   		<div class="receipt">
+			<form action="/coopshop/search" method="GET">
+				<input type="text" name="q">
+				<input type="submit" value="Search">
+			</form>
+   		</div>
+   		{% endblock %}
+    		<div class="receipt">
+              <h2>Your Order</h2>
+              <table >
+              <colgroup>
+              <col />
+              <col />
+              <col align="right" />
+              </colgroup> 
+              	  <thead>
+                  	  <td>Quantity</td>
+                      <td>Description</td>
+                      <td>Amount</td>
+                  </thead>
+                  
+                  
+		<tr id="item-empty">
+                	<td>
+                   	</td>
+                    <td>No Items in Order
+                    </td>
+                    <td>
+                    </td>
+                 </tr>
+                  <tr class="top">
+                      <td></td>
+                      <td>Sub Total</td>
+                      <td id="subtotal">{{request.session.cart.subtotal|floatformat:2}}</td>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td>Sales TAX</td>
+                      <td id="tax">{{request.session.cart.tax|floatformat:2}}</td>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td>Nonmember Fee</td>
+                      <td id="nonmemberFee">{{request.session.cart.nonmemberFee|floatformat:2}}</td>
+                  </tr>
+                  <tr class="bottom">
+                      <td ></td>
+                      <td >Total</td>
+                      <td id="total" >{{request.session.cart.total|floatformat:2}}</td>
+                  </tr>
+				</table>
+                <form method="GET" action="{% url cart %}">
+                <input type="submit" class="order" value="Order Now">
+               	</form>
+        	</div>
+        </div>
+{% endblock %}
+    </div>
+	</div>
+</div>
+
+    {% block footer %}
+    <div id="footer" >{{ footer|markdown }}</div>
+    {% endblock footer %}
+</body>
+
+</html>
+

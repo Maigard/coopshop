@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block breadcrumb %}{% endblock %}
+{% block content %}
+		{% for category in categories %}
+     		<div class="span-4">
+        		<div class="category-bin bin">
+				<a href="{{category.get_absolute_url}}">
+                			<div class="feature">
+						{% thumbnail category.image "140x90" as img %}
+						<img src="{{ img.url }}" />
+						{% endthumbnail %}
+					</div>
+                			<h3>{{category.name}}</h3>
+				</a>
+                	</div>
+       		 </div>
+		{% endfor %}
+{% endblock %}

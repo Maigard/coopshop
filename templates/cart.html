@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block receipt %}{% endblock %}
+
+{% block content %}
+			
+        	<div class="span-16" >
+    		<div class="order-info" style="margin:5px;" >
+              
+              <table>
+              <h2>Please Verify Your Order</h2>
+              <p><strong>Order for: {{user.first_name}} {{user.last_name}}<br />
+        Email Address: {{user.email}}</strong></p>
+              	  <thead>
+                  	  <th col width="11%">Quantity</th>
+                      <th col width="15%">Units</th>
+                      <th style="text-align: center">Product Description</th>
+                      <th col width="12%">Amount</th>
+                  </thead>
+{% for item in cart.items.itervalues %}
+	{% if item.quantity > 0 %}
+                  <tr>
+                      <td class="top"><input type="text" value="{{item.quantity}}" /></td>
+                      <td class="top">{{item.unit}}</td>
+                      <td class="top" style="text-align: center">{{item.description}}</td>
+                      <td class="top">{{item.price|floatformat:2}}</td>
+                  </tr>
+	{% endif %}
+{% endfor %}
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right">Sub Total</td>
+                      <td >{{cart.subtotal|floatformat:2}}</td>
+                  </tr>
+{% if cart.nonmemberFee %}
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right" >Nonmember Fee</td>
+                      <td  >{{cart.nonmemberFee|floatformat:2}}</td>
+                  </tr>
+{% endif %}
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right" >Sales TAX</td>
+                      <td  >{{cart.tax|floatformat:2}}</td>
+                  </tr>
+                  <tr>
+                  	  <td class="bottom"></td>	
+                      <td class="bottom"></td>
+                      <td class="bottom" style="text-align: right">Total</td>
+                      <td class="bottom" >{{cart.total|floatformat:2}}</td>
+                  </tr>
+				</table>
+		<form method="get" action="{% url charge %}">
+                	<input type="submit" class="shop" value="Order Now" />
+		</form>
+                <button type="button" onclick="location.href='{% url index %}'" class="cart">Shop More</button>
+        	</div>
+         </div>
+
+ {% endblock %}

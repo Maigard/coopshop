@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block extrascripts %}
+<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+      Stripe.setPublishableKey('{{stripe_key}}');
+      $("#payment-form").submit(function(event) {
+        if ($('.card-number').val() == "4242424242424242") {
+		return true;
+	}
+        if ($('input[name=card]:checked').val() != 'prevCard') {
+		// disable the submit button to prevent repeated clicks
+		$('.submit-button').attr("disabled", "disabled");
+	    
+		Stripe.createToken({
+		    number: $('.card-number').val(),
+		    cvc: $('.card-cvc').val(),
+		    name: $('.card-name').val(),
+		    exp_month: $('.card-expiry-month').val(),
+		    exp_year: $('.card-expiry-year').val()
+		}, stripeResponseHandler);
+	    
+		// prevent the form from submitting with the default action
+		return false;
+         }
+      });
+    });
+    function stripeResponseHandler(status, response) {
+        if (response.error) {
+            // show the errors on the form
+            $("#error").text(response.error.message);
+            $(".submit-button").removeAttr("disabled");
+        } else {
+            var form$ = $("#payment-form");
+            // token contains id, last4, and card type
+            var token = response['id'];
+            // insert the token into the form so it gets submitted to the server
+            form$.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
+            // and submit
+            form$.get(0).submit();
+        }
+    }
+</script>
+{% endblock %}
+{% block receipt %}{% endblock %}
+
+{% block content %}
+	<div id="error">{{error}}</div>
+       	<div class="span-16" >
+		<form action="" method="POST" id="payment-form">
+                    {% csrf_token %}
+                    {% if prevCard %}
+                    <input type="radio" name="card" value="prevCard" checked/><label>Use Previous Card:</label>
+			<div><label>Card Type:</label>{{prevCard.type}}</div>
+                        <div><label>Name on Card:</label>{{prevCard.name}}</div>
+                        <div><label>Last 4 digits:</label>{{prevCard.last4}}</div>
+                    <input type="radio" name="card" value="newCard"/><label>Use a new card:</label>
+                    {% endif %}
+		        <div class="form-row">
+		            <label>Name on card</label>
+		            <input type="text" size="20" autocomplete="off" class="card-name"/>
+		        </div>
+		        <div class="form-row">
+		            <label>Card Number</label>
+		            <input name="card-number" type="text" size="20" autocomplete="off" class="card-number"/>
+		        </div>
+		        <div class="form-row">
+		            <label>CVC</label>
+		            <input type="text" size="4" autocomplete="off" class="card-cvc"/>
+		        </div>
+		        <div class="form-row">
+		            <label>Expiration (MM/YYYY)</label>
+		            <input type="text" size="2" class="card-expiry-month"/>
+		            <span> / </span>
+		            <input type="text" size="4" class="card-expiry-year"/>
+		        </div>
+		    <button type="submit" class="submit-button">Submit Payment</button>
+		</form>
+       	</div>
+ {% endblock %}

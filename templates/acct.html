@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{%block breadcrumb %}{% endblock %}
+{%block receipt %}{% endblock %}
+{% block content %}
+        
+        <h3> Account Info </h3>
+        <div class="shift">
+        <p>Name: &nbsp; {{user.get_full_name}}<br />
+        E-mail: &nbsp; {{user.email}}<br />
+        Address:<br/>
+	{{user.get_profile.address1}}<br />
+	{% if user.get_profile.address2 %}
+	{{user.get_profile.address2}}<br />
+	{% endif %}
+	{{user.get_profile.city}}, {{user.get_profile.state}} {{user.get_profile.zip}}<br />
+        </div>
+        <!--<button type="button" class="account-button">Change Account Information</button>-->
+	<h3> Card Info </h3>
+        <div class="shift">
+	{% if card %}
+	Name: {{user.get_profile.get_card.name}}<br />
+	Type: {{user.get_profile.get_card.type}}<br />
+	Last 4 digits: {{user.get_profile.get_card.last4}}<br />
+	Expiration: {{user.get_profile.get_card.exp_month}}/{{user.get_profile.get_card.exp_year}}<br />
+	{% else %}
+	No card Stored<br />
+	{% endif %}
+	</div>
+
+	<h3> Member Info </h3>
+        <div class="shift">
+        Member: {% if user.get_profile.is_member %}Yes{% else %}No{% endif %}<br />
+        Donated: {{user.get_profile.membershipBalance}}<br />
+	<br />
+	</div>
+        
+        <h3> Order History </h3>
+        <table><!-- class="youraccount" > -->
+        	<thead>
+            	<td><strong>Order Date</strong></td>
+                <td><strong>Order Total</strong></td>
+                <td><strong>Charged</strong></td>
+                <td><strong>Delivered</strong></td>
+             </thead>
+	{%for order in orders %}
+             <tr>
+		
+             	<td><a href='/coopshop/order/{{order.id}}'>{{order.date}}</a></td>
+                <td>${{order.total}}</td>
+                <td>{% if order.paid %}Yes{% else %}No{% endif %}</td>
+                <td>{% if order.delivered %}Yes{% else %}No{% endif %}</td>
+             </tr>
+	{% empty %}
+		<tr><td><strong>No Orders Yet</strong></td></tr>
+	{% endfor %}
+         </table>
+         
+        
+           
+
+{% endblock %}

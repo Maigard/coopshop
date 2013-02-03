@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load markup %}
+
+{% block content %}
+		{% if products.number == 1 %}
+        	<div class="bio">
+            		<div class="bio-image">
+        				<img src="{{ MEDIA_URL}}{{producer.image}}" />
+			</div><h2>{{producer.name}}</h2>
+            		{{ producer.about|markdown }}
+            	</div>
+		{% endif %}
+		{% include "product_list.html" %}
+{% endblock %}

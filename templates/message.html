@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block breadcrumb %}{% endblock %}
+{% block receipt %}{% endblock %}
+
+{% block content %}
+	<h2>Send us a message!</h2>
+	<h4>Do you want an Azure order? Do you want to us to source from a new producer? Do you want us to provide a new product?  Or do you just want to tell us how awesome we are.  Anything at all, let us know.</h4>
+
+		<form method="POST">
+		{% csrf_token %}
+		<textarea name="message"></textarea><br />
+		<input type="submit">
+		</form>
+{% endblock %}
+
+       		
+

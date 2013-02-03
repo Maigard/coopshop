@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block receipt %}{% endblock %}
+{% block breadcrumb %}{% endblock %}
+
+{% block content %}
+
+{{message|safe}}
+
+        	<div class="span-16" >
+    		<div class="order-info" style="margin:5px;" >
+              
+              <table>
+              <h2>Order</h2>
+              <p><strong>Order for: {{order.customer.first_name}} {{order.customer.last_name}}<br />
+        Email Address: {{order.customer.email}}<br />
+        Date: {{order.date}}</strong></p>
+              	  <thead>
+                  	  <th col width="11%">Quantity</th>
+                      <th col width="15%">Units</th>
+                      <th style="text-align: center">Product Description</th>
+                      <th col width="12%">Amount</th>
+                  </thead>
+{% for item in items %}
+                  <tr>
+                      <td class="top">{{item.quantity}}</td>
+                      <td class="top">{{item.product.unit}}</td>
+                      <td class="top" style="text-align: center">{{item.product.name}}</td>
+                      <td class="top">{{item.price|floatformat:2}}</td>
+                  </tr>
+{% endfor %}
+                  <tr>
+                      <td></td>
+                      <td></td>
+                      <td style="text-align: right">Sub Total</td>
+                      <td >{{order.subtotal}}</td>
+                  </tr>
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right" >Sales TAX</td>
+                      <td  >{{order.tax}}</td>
+                  </tr>
+{% if order.nonmemberFee %}
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right" >Nonmember Fee</td>
+                      <td  >{{order.nonmemberFee}}</td>
+                  </tr>
+{% endif %}
+{% if order.deliveryFee %}
+                  <tr>
+                  	  <td></td>
+                      <td></td>
+                      <td style="text-align: right" >Delivery Fee</td>
+                      <td  >{{order.deliveryFee}}</td>
+                  </tr>
+{% endif %}
+                  <tr>
+                  	  <td class="bottom"></td>	
+                      <td class="bottom"></td>
+                      <td class="bottom" style="text-align: right">Total</td>
+                      <td class="bottom" >{{order.total}}</td>
+                  </tr>
+				</table>
+        	</div>
+         </div>
+
+ {% endblock %}

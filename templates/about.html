@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load markup %}
+{% block receipt %}
+<div class="span-7 last" >
+	<div class="receipt">
+                <h3 style="text-align:center; margin-top:1em;">Learn More</h3>
+                <ul style="padding-left:3em">
+			{% for title in titles %}
+                	<li><a href="/coopshop/about/{{title|urlencode}}">{{title}}</a></li>
+			{% endfor %}
+                </ul>
+	</div>
+</div>
+{% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block content %}
+<div class="span-15">
+{{page.content|markdown}}
+</div>
+{% endblock %}

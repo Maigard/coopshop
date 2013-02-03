@@ -1,0 +1,343 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*  
+Sticky Footer Solution
+by Steve Hatcher 
+http://stever.ca
+http://www.cssstickyfooter.com
+*/
+
+* {margin:0;padding:0;} 
+
+/* must declare 0 margins on everything, also for main layout components use padding, not 
+vertical margins (top and bottom) to add spacing, else those margins get added to total height 
+and your footer gets pushed down a bit more, creating vertical scroll bars in the browser */
+
+html, body {height: 100%; text-align:center;}
+#wrap{text-align:left;margin-left: auto;margin-right: auto; width: 960px;}
+
+#wrap {min-height: 100%;}
+
+#main {overflow:auto;
+	padding-bottom: 180px;}  /* must be same height as the footer */
+
+#footer {
+	position: relative;
+	background:#c5dd8d;
+	margin-top: -180px; /* negative value of footer height */
+	height: 180px;
+	clear:both;
+	} 
+
+/*Opera Fix*/
+body:before {/* thanks to Maleika (Kohoutec)*/
+content:"";
+height:100%;
+float:left;
+width:0;
+margin-top:-32767px;/* thank you Erik J - negate effect of float*/
+}
+
+/*.footer {
+	width:950px;
+	margin:0 auto;
+	height: 100px;
+	background:#c5dd8d;
+	margin-top: 20px;
+}*/
+
+
+
+
+
+/* IMPORTANT
+
+You also need to include this conditional style in the <head> of your HTML file to feed this style to IE 6 and lower and 8 and higher.
+
+<!--[if !IE 7]>
+	<style type="text/css">
+		#wrap {display:table;height:100%}
+	</style>
+<![endif]-->
+
+*/
+
+
+.container {
+	text-align: left;
+	background-color: white;
+
+}
+
+
+
+#header {
+	background:url(logo.png) no-repeat top left;
+	position: relative;
+    width:200px;
+    height:125px;
+    top: 10px;
+    left: 20px;
+	margin-bottom: 10px;
+}
+
+#tag p {
+	margin-top: 75px;
+	margin-bottom: -10px;
+	font-size: 1.5em;
+	font-style: italic;
+}
+
+#login-bar {
+	position: relative;
+	float: right;
+}
+
+#login-bar p {
+	font-size: 1.5em;
+}
+
+hr {
+	margin-top: 10px;
+	width: 100%;
+	height: 8px;
+	background-color: #3c912c;	
+}
+
+#nav{
+	padding: 0;
+	float: left;
+	width: 100%;
+}
+
+#nav li{
+	display: inline;
+	padding: 20px;
+	margin: 4px;
+}
+
+
+#sidebar li {
+  
+}
+
+#sidebar h3 {
+   margin-top:2em;
+}
+
+.badge {
+	margin-left: 2px;
+	margin-bottom: 10px;
+}
+
+.bin {
+	border:2px solid #a1a1a1;
+	padding: 4px;
+	margin: 4px; 	
+	background: white;
+	width: 95%;
+	border-radius:8px;
+	-moz-border-radius:8px; /* Firefox 3.6 and earlier */
+	overflow: hidden;
+}
+
+.category-bin {
+	height: 12em;
+}
+
+.frame {
+	margin: 50px;
+}
+
+.feature {
+	width: 140px;
+	height: 90px;
+	background: white;
+	border: none;
+	margin: 4px;	
+	float: left;
+}
+
+
+
+.bin-header {
+	overflow: hidden;
+	margin-bottom: 4px;
+}
+
+.bin h3 {
+	text-align: center;
+}
+
+.product {
+	position: relative;
+	float: left;
+}
+
+.producer {
+	position: relative;
+	float: right;
+}
+
+.amt-per {
+	position: relative;
+	float: right;
+}
+
+.add-button {
+	position: relative;
+	float: right;
+}
+
+.quantity-box {
+	position: relative;
+	float: right;
+	margin-right: 4px;
+	bottom: -4px;
+}
+
+.receipt {
+	position: relative;
+	border:4px #a1a1a1;
+	padding: 4px;
+	margin-left: -10px;	
+	background:#fffcc8;
+	width: 95%;
+	border-radius:8px;
+	border-style:double;
+	-moz-border-radius:8px; /* Firefox 3.6 and earlier */
+}
+
+.receipt h2 {
+	text-align: center;
+	
+}
+
+.order-info {
+	position: relative;
+	border:4px #a1a1a1;
+	padding: 4px;
+	margin-left: -10px;	
+	background:#fffcc8;
+	width: 95%;
+	border-radius:8px;
+	border-style:double;
+	-moz-border-radius:8px; /* Firefox 3.6 and earlier */
+}
+
+.order-info h2 {
+	text-align: center;
+}
+
+table {margin-bottom: 50px;}
+tbody tr:nth-child(even) td, tbody tr.even td {background:#c5dd8d;}
+
+tr.top td { border-top: 2px; }
+tr.bottom td { border-bottom: 2px; }
+thead td { border-bottom: 2px; }
+
+table.youraccount tr:nth-child(even) td, tbody tr.even td{ background: white; }
+table.youraccount input[type="text"] table.youraccount input[type="password"] { width: 15em; color: gray; }
+
+
+
+
+tbody tr:nth-child(even) td, tbody tr.even td {background:#c5dd8d;}
+
+#dialog table {margin-bottom: 5px;}
+#dialog tr:nth-child(even) td, tbody tr.even td {background:#white;}
+
+
+input[type="text"] input[type="password"]
+{
+width:4em;
+display:block;
+margin-top: 1px;
+margin-bottom: 1px;
+background-color: white;
+}
+
+.long input[type="text"] input[type="password"]
+{
+width:11em;
+display: block;
+margin-top: 1px;
+margin-bottom: 1em;
+background-color: white;
+}
+
+.short input[type="text"] input[type="password"]
+{
+width:10em;
+display: block;
+margin-top: 1px;
+margin-bottom: 1em;
+background-color: white;
+}
+
+.long input[type="password"] input[type="password"]
+{
+width:11em;
+display: block;
+margin-top: 1px;
+margin-bottom: 1em;
+background-color: white;
+}
+
+input[type="text"].short
+{
+width:3em;
+display: block;
+margin-top: 1px;
+margin-bottom: 1em;
+background-color: white;
+}
+	
+	
+
+.register {
+	padding: 20px;
+}
+
+.order {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;	
+}
+
+.edit {
+	position: relative;
+	float: right;
+}
+
+.shop {
+	position: absolute;
+	bottom: 10px;
+	right: 100px;
+}
+
+.bio {
+	padding: 10px;
+}
+
+.bio-image {
+	position: relative;
+	float: left;
+	margin: 5px;
+}
+
+.cycle-message {
+	float: right;
+	background: yellow;
+	margin: 10px;
+	padding: 5px solid yellow;
+	font-size: 1.2em;
+	text-align: right;
+}
+
+
+
+	
+	
+	

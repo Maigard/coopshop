@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block breadcrumb %}{% endblock %}
+{% block content %}
+            <p>For some reason your email or password did not match one that we have on file.  Please try again, or <a href="{% url signup %}">sign up to shop our products online.</a><p>
+            {% for error in errors %}{% if forloop.first %}<div class="error"><ul>{% endif %}<li>{{error}}</li>{% if forloop.last %}</ul></div>{% endif %}{% endfor %}
+            <div class="register">
+                <form method="post" action="{% url django.contrib.auth.views.login %}">
+			{% csrf_token %}
+                        Email:&nbsp;<input type="text" name="username"/><br>
+                        Password:&nbsp;<input type="password" name="password"/><br>
+                      	<a href="{% url password_reset %}">Forgot your password?</a><br><br>
+                        <button type="submit" class="createaccount">Login Now</button>
+			<input type="hidden" name="next" value="{% if next != "" %}{{ next }}{% else %}{% url index %}{% endif %}">
+                </form>
+             </div>
+             <p>Although you don't have to be a member to shop Atomic Cooperative Market, the benefits are excellent and just $25 gets you started! <a href="">Read MORE about becoming a member</a>.</p>
+{% endblock %}
