@@ -66,7 +66,7 @@ def get_footer():
 	
 def user(request, user):
 	if request.user.is_authenticated():
-		if request.user.groups.filter(name="Admins") or request.user.id == user:
+		if request.user.groups.filter(name="Admins") or request.user.login == user:
 			try:
 				user = User.objects.get(username = user)
 			except ObjectDoesNotExist:
