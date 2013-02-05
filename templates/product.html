@@ -18,7 +18,7 @@
 					<div class="order-date"><strong>Order before {{product.get_orderByDate}}</strong></div><br />
 					<strong>{{product.get_remaining}} currently in stock</strong>
 				{% endif %}
-				<form action="{% url coopshop.views.order %}" method="post">
+				<form action="{% url coopshop.views.cart %}" method="post">
 				{% csrf_token %}
 				<div class="add-button"><button type="submit" class="add">Add</button></div>
 				<div class="quantity-box"><input type="text" name="quantity" value="1"  /></div>
