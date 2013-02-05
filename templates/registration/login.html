@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block breadcrumb %}{% endblock %}
 {% block content %}
-            <p>For some reason your email or password did not match one that we have on file.  Please try again, or <a href="{% url signup %}">sign up to shop our products online.</a><p>
+            <p>For some reason your email or password did not match one that we have on file.  Please try again, or <a href="{% url coopshop.views.signup %}">sign up to shop our products online.</a><p>
             {% for error in errors %}{% if forloop.first %}<div class="error"><ul>{% endif %}<li>{{error}}</li>{% if forloop.last %}</ul></div>{% endif %}{% endfor %}
             <div class="register">
                 <form method="post" action="{% url django.contrib.auth.views.login %}">

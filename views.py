@@ -288,6 +288,8 @@ def cart(request):
 		else:
 			raise HttpResponseBadRequest
 	elif request.method == "GET":
+		if request.GET.get("format") == "json":
+			return HttpResponse(json.dumps(cart, default=encode_json))
 		if request.user.is_authenticated():
 			return render_to_response(
 							"cart.html",
@@ -299,6 +301,10 @@ def cart(request):
 							context_instance=RequestContext(request))
 		else:
 			return render_to_response("registration/login.html", {"next": request.path}, context_instance=RequestContext(request))
+
+def encode_json(obj):
+	if isinstance(obj, decimal.Decimal):
+		return float(obj)
 
 def charge(request):
 	if request.method == "GET":
@@ -554,7 +560,7 @@ urls = patterns('',
 	url(r'^signup$', signup),
 	url(r'^search$', search),
 	url(r'^order/(.*)', order),
-	url(r'^cart', cart, name="cart"),
+	url(r'^cart', cart),
 	url(r'^charge', charge),
 	url(r'^message$', message),
 	url(r'^messageThanks$', messageThanks),
