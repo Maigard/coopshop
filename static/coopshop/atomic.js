@@ -40,7 +40,7 @@ updateOrder = function(prodId, quantity, description, price) {
 		var quantity = $("<input>").attr({type: "text", name: "quantity", value:quantity, class:"short" });
 		quantity.keyup(function() {
 			if( $(this).val() != "") {
-				$.post("/coopshop/cart/",
+				$.post(cartUrl,
 					{ "quantity": $(this).val(),
 					  "productId": prodId,
 					  "action": "setOrderItem"},
@@ -77,10 +77,17 @@ updateTotals = function(subtotal, tax, nonmemberFee, total) {
 	$("#total").text("$"+total.toFixed(2));
 }
 
+initializeOrder = function(order) {
+	$.each(order.items, function(prodId, prod) {
+		updateOrder(prodId, prod.quantity, prod.description, prod.price);
+	});
+	updateTotals(order.subtotal, order.tax, order.nonmemberFee, order.total);
+}
+
 $(document).ready(function(){
         $( ".bin form").each(function() {
                 $(this).submit( function() {
-                        $.post("/coopshop/cart/",
+                        $.post(cartUrl,
                                         $(this).serialize(),
                                         function(data) {
                                         	updateOrder(data.item.prodId, data.item.quantity, data.item.description, data.item.price);
