@@ -485,15 +485,27 @@ def salesReport(request):
 						"sections": section
 					},
 					context_instance=RequestContext(request))
+class MessageForm(forms.Form):
+	messageType	= forms.ModelChoiceField(label="Message Type", queryset=models.MessageCategory.objects.all())
+	message		= forms.CharField(label="Message", widget=forms.Textarea)
+
 def message(request):
 	if not request.user.is_authenticated():
 		return render_to_response("registration/login.html", {"next": request.path}, context_instance=RequestContext(request))
 
 	if request.method == 'POST':
-		models.Message(user = request.user, text = request.POST["message"]).save()
-		return HttpResponseRedirect('messageThanks')
+		form = MessageForm(request.POST)
+		if form.is_valid():
+			message = models.Message(	user = request.user,
+							text = form.cleaned_data["message"],
+							category = form.cleaned_data["messageType"])
+			message.save()
+			return HttpResponseRedirect('messageThanks')
+	else: 
+		form = MessageForm()
 
 	return render_to_response('message.html', {
+		"form": form,
 		"cycle": models.Cycle.getCurrentCycle(),
 		"footer": get_footer()
 	},

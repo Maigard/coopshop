@@ -8,7 +8,9 @@
 
 		<form method="POST">
 		{% csrf_token %}
-		<textarea name="message"></textarea><br />
+		<table class="unstyled">
+		{{form.as_table}}
+		</table>
 		<input type="submit">
 		</form>
 {% endblock %}

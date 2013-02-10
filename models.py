@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
@@ -374,13 +375,38 @@ class UserProfile(models.Model):
 			self.lifetimeMember = True
 		super(UserProfile, self).save()
 
+class MessageCategory(models.Model):
+	name		= models.CharField(max_length=64)
+	contact		= models.ForeignKey(User, null=True, blank=True)
+
+	class Meta:
+		verbose_name_plural = "Message Categories"
+		ordering = ["name"]
+	
+	def __unicode__(self):
+		return self.name
+
 class Message(models.Model):
 	user		= models.ForeignKey(User)
+	category	= models.ForeignKey(MessageCategory)
 	date	 	= models.DateField(default=datetime.date.today)
+	responded	= models.BooleanField(default=False)
 	text		= models.TextField()
 
 	class Meta:
 		ordering = ["date"]
+
+	def send_message(self):
+		send_mail(self.category.name, "Message from: %s\n%s" % (self.user.email, self.text), "website@atomiccoop.org", [self.category.contact.email])
+
+	def save(self):
+		if self.id:
+			oldMessage = Messaage.objects.filter(id = self.id)
+			if self.category != oldMessage.category or text.category != oldMessage.category:
+				self.send_message()
+		else:
+			self.send_message()
+		super(Message, self).save()
 
 class Setting(models.Model):
 	key		= models.CharField(max_length=128)
