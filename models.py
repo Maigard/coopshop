@@ -215,7 +215,7 @@ class Order(models.Model):
 				profile.save()
 			self.paid = True
 			self.paymentId = charge["id"]
-			self.processingFee = Decimal(charge["fee"]/100.0).quantize(TWOPLACES)
+			self.processingFee = (Decimal(charge["fee"])/100).quantize(TWOPLACES)
 		self.save()
 
 	def fullRefund(self):
