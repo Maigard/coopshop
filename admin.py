@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
@@ -25,10 +26,22 @@ class ProducerAdmin(AdminImageMixin, admin.ModelAdmin):
 
 admin.site.register(models.Producer, ProducerAdmin)
 
+class MessageCategoryAdmin(admin.ModelAdmin):
+	list_display = ('name', 'contact');
+	search_fields = ('name', 'contact')
+
+	def formfield_for_foreignkey(self, db_field, request, **kwargs):
+		if db_field.name == "contact":
+			kwargs["queryset"] = User.objects.filter(groups__name = "Admins")
+        	return super(MessageCategoryAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(models.MessageCategory, MessageCategoryAdmin)
+
 class MessageAdmin(admin.ModelAdmin):
-	list_display = ('user', 'date');
-	list_filter = ('user',)
+	list_display = ('user', 'date', 'category', 'responded');
+	list_filter = ('category', 'responded')
 	search_fields = ('user', 'text')
+	readonly_fields = ('date', 'user')
 admin.site.register(models.Message, MessageAdmin)
 
 class CategoryAdmin(AdminImageMixin, admin.ModelAdmin):
@@ -167,7 +180,7 @@ class OrderAdminForm(forms.ModelForm):
 
 class OrderAdmin(admin.ModelAdmin):
 	list_display = ('id', 'customer', 'date', 'total', 'paid', 'delivered')
-	readonly_fields = ('subtotal', 'tax', 'total', 'processingFee', 'paymentId', 'paid')
+	readonly_fields = ('subtotal', 'tax', 'total', 'processingFee', 'paymentId', 'paid', 'date')
 	inlines = (OrderItemInline,)
 	list_filter = ('date', 'paid', 'delivered')
 	actions = ("delivered", "refund", "charge")
@@ -220,7 +233,6 @@ class OrderAdmin(admin.ModelAdmin):
 
 admin.site.register(models.Order, OrderAdmin)
 
-from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
  
 admin.site.unregister(User)

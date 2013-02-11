@@ -237,7 +237,7 @@ tr.top td { border-top: 2px; }
 tr.bottom td { border-bottom: 2px; }
 thead td { border-bottom: 2px; }
 
-table.youraccount tr:nth-child(even) td, tbody tr.even td{ background: white; }
+table.unstyled tr:nth-child(even) td, tbody tr.even td{ background: white; }
 table.youraccount input[type="text"] table.youraccount input[type="password"] { width: 15em; color: gray; }
 
 
