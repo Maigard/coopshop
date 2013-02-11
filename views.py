@@ -355,7 +355,7 @@ def charge(request):
 								"footer": get_footer()
 							},
 							context_instance=RequestContext(request))
-		except:
+		except Exception, e:
 			order.delete()
 			return render_to_response(	"charge.html",
 							{
@@ -363,7 +363,7 @@ def charge(request):
 								"stripe_key": models.Setting.objects.get(key="Stripe Public Key").value,
 								"cycle": models.Cycle.getCurrentCycle(),
 								"footer": get_footer(),
-								"error": "Error Charging Card"
+								"error": "Error Charging Card: %s" % str(e)
 							},
 							context_instance=RequestContext(request))
 
