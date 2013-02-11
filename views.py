@@ -59,7 +59,7 @@ def get_query(query_string, search_fields):
     return query
 
 def index(request):
-	return redirect("/categories");
+	return redirect("/about");
 
 def get_footer():
 	return models.Setting.objects.get(key="Footer Text").value
