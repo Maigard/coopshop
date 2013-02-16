@@ -179,12 +179,15 @@ class OrderAdminForm(forms.ModelForm):
 		return super(OrderAdminForm, self).clean()
 
 class OrderAdmin(admin.ModelAdmin):
-	list_display = ('id', 'customer', 'date', 'total', 'paid', 'delivered')
+	list_display = ('id', 'customer', 'fullname', 'date', 'total', 'paid', 'delivered')
 	readonly_fields = ('subtotal', 'tax', 'total', 'processingFee', 'paymentId', 'paid', 'date')
 	inlines = (OrderItemInline,)
 	list_filter = ('date', 'paid', 'delivered')
 	actions = ("delivered", "refund", "charge")
 	#form = OrderAdminForm
+
+	def fullname(self, obj):
+		return "%s %s" % (obj.customer.first_name, obj.customer.last_name)
 
 	def get_actions(self, request):
 		actions = super(OrderAdmin, self).get_actions(request)

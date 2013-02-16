@@ -401,8 +401,8 @@ class Message(models.Model):
 
 	def save(self):
 		if self.id:
-			oldMessage = Messaage.objects.filter(id = self.id)
-			if self.category != oldMessage.category or text.category != oldMessage.category:
+			oldMessage = Message.objects.get(id = self.id)
+			if self.category != oldMessage.category or self.category != oldMessage.category:
 				self.send_message()
 		else:
 			self.send_message()
