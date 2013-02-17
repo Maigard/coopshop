@@ -412,7 +412,9 @@ def producerReport(request):
 			sections = []
 			filters = {}
 			if "Admins" not in groups:
-				form.cleaned_data["producer"] = request.user.get_profile().producer
+				filters["products__producer"] = request.user.get_profile().producer
+			else:
+				filters["products__producer"] = form.cleaned_data["producer"]
 			if form.cleaned_data["cycle"] == None:
 				filters["cycle"] = models.Cycle.getCurrentCycle()
 			else:
@@ -423,16 +425,15 @@ def producerReport(request):
 			totalcost = 0
 			columnHeaders = ["Quantity", "Product"]
 			for order in orders:
-				if form.cleaned_data["producer"] in [product.producer for product in order.products.all()]:
-					profile = order.customer.get_profile()
-					sectionHeader = [order.customer.get_full_name(), profile.address1]
-					if profile.address2:
-						sectionHeader.append(profile.address2)
-					sectionHeader.append("%s, %s, %s" % (profile.city, profile.state, profile.zip))
-					entries = [[orderItem.quantity, orderItem.product.name] for orderItem in models.OrderItem.objects.filter(order = order, product__producer = form.cleaned_data["producer"])]
-					sections.append({"sectionHeader": sectionHeader, "columnHeaders": columnHeaders, "entries": entries})
-			items = models.OrderItem.objects.filter(order__cycle = form.cleaned_data["cycle"], product__producer = form.cleaned_data["producer"]).values("product").annotate(quantity=Sum("quantity"))
-			sections.append({"sectionHeader": ["Totals"], "columnHeaders": columnHeaders, "entries": [[i["quantity"], models.Product.objects.get(id=i["product"]).name] for i in items]})
+				profile = order.customer.get_profile()
+				sectionHeader = [order.customer.get_full_name(), profile.address1]
+				if profile.address2:
+					sectionHeader.append(profile.address2)
+				sectionHeader.append("%s, %s, %s" % (profile.city, profile.state, profile.zip))
+				entries = [[orderItem.quantity, orderItem.product.name] for orderItem in models.OrderItem.objects.filter(order = order, product__producer = filters["products__producer"])]
+				sections.append({"sectionHeader": sectionHeader, "columnHeaders": columnHeaders, "entries": entries})
+			items = models.OrderItem.objects.filter(order__cycle = filters["cycle"], product__producer =filters["products__producer"]).values("product__name").annotate(quantity=Sum("quantity"))
+			sections.append({"sectionHeader": ["Totals"], "columnHeaders": columnHeaders, "entries": [[i["quantity"], i["product__name"]] for i in items]})
 	else:
 		form = ProducerReportForm(groups)
 		sections = None
@@ -459,7 +460,7 @@ def salesReport(request):
 			else:
 				cycle = form.cleaned_data["cycle"]
 			
-		section = {"columnHeaders": ["Id", "Name", "Gross", "Nonmember Fee", "Delivery Fee", "tax", "Expense", "Processing Fee", "Net"], "entries": []}
+		section = {"columnHeaders": ["Order", "Name", "Gross", "Nonmember Fee", "Delivery Fee", "tax", "Expense", "Processing Fee", "Net"], "entries": []}
 		totals = [0] * 7
 		for order in models.Order.objects.filter(cycle = cycle):
 			wholesale = sum([item.quantity * item.wholesalePrice for item in models.OrderItem.objects.filter(order = order)])
