@@ -423,17 +423,31 @@ def producerReport(request):
 			products = {}
 			totals = {}
 			totalcost = 0
-			columnHeaders = ["Quantity", "Product"]
+			columnHeaders = ["Quantity", "Product", "Wholesale"]
+			displayedOrders = set()
+			items = {}
 			for order in orders:
-				profile = order.customer.get_profile()
-				sectionHeader = [order.customer.get_full_name(), profile.address1]
-				if profile.address2:
-					sectionHeader.append(profile.address2)
-				sectionHeader.append("%s, %s, %s" % (profile.city, profile.state, profile.zip))
-				entries = [[orderItem.quantity, orderItem.product.name] for orderItem in models.OrderItem.objects.filter(order = order, product__producer = filters["products__producer"])]
-				sections.append({"sectionHeader": sectionHeader, "columnHeaders": columnHeaders, "entries": entries})
-			items = models.OrderItem.objects.filter(order__cycle = filters["cycle"], product__producer =filters["products__producer"]).values("product__name").annotate(quantity=Sum("quantity"))
-			sections.append({"sectionHeader": ["Totals"], "columnHeaders": columnHeaders, "entries": [[i["quantity"], i["product__name"]] for i in items]})
+				if order not in displayedOrders:
+					profile = order.customer.get_profile()
+					sectionHeader = ["Order #%s" % order.id, order.customer.get_full_name(), profile.address1]
+					if profile.address2:
+						sectionHeader.append(profile.address2)
+					sectionHeader.append("%s, %s, %s" % (profile.city, profile.state, profile.zip))
+					orderItems = models.OrderItem.objects.filter(order = order, product__producer = filters["products__producer"])
+					entries = [[orderItem.quantity, orderItem.product.name, (orderItem.quantity * orderItem.wholesalePrice).quantize(TWOPLACES),] for orderItem in orderItems]
+					entries.append(["", "Total", sum([i[2] for i in entries])])
+					sections.append({"sectionHeader": sectionHeader, "columnHeaders": columnHeaders, "entries": entries})
+					displayedOrders.add(order)
+					for orderItem in orderItems:
+						try:
+							items[orderItem.product]["quantity"] += orderItem.quantity
+							items[orderItem.product]["wholesalePrice"] += (orderItem.quantity * orderItem.wholesalePrice).quantize(TWOPLACES)
+						except KeyError:
+							items[orderItem.product] = {	"wholesalePrice": (orderItem.wholesalePrice * orderItem.quantity).quantize(TWOPLACES),
+											"quantity": orderItem.quantity}
+			items = [(value["quantity"], key.name, value["wholesalePrice"]) for (key, value) in items.iteritems()]
+			items.append(["", "Total", sum([item[2] for item in items])])
+			sections.append({"sectionHeader": ["Totals"], "columnHeaders": columnHeaders, "entries": items})
 	else:
 		form = ProducerReportForm(groups)
 		sections = None
