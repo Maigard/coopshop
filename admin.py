@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.cache import get_cache
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
@@ -165,6 +166,11 @@ class OrderItemInline(admin.TabularInline):
 	model = models.OrderItem	
 	#formset = OrderItemInlineFormSet
 	extra = 1
+
+	def formfield_for_foreignkey(self, db_field, request, **kwargs):
+		if db_field.name == "product":
+			kwargs["queryset"] = models.Product.objects.select_related().all()
+		return super(OrderItemInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 class OrderAdminForm(forms.ModelForm):
 	class Meta:
