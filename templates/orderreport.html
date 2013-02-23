@@ -10,7 +10,7 @@
 		<input type="submit">
 		</form>
 		{% for order in orders %}
-			{% if order.orderitem_set.count > 0 %}
+		<br />
 		<div class="bin">
 		<table>
 			<tr>
@@ -67,7 +67,5 @@
 			</tr>
 		</table>
 		</div>
-		<br />
-			{% endif %}
 		{% endfor %}
 {% endblock %}
