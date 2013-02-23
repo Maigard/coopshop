@@ -382,7 +382,7 @@ def orderReport(request):
 				cycle = models.Cycle.getCurrentCycle()
 			else:
 				cycle = form.cleaned_data["cycle"]
-			orders = models.Order.objects.filter(cycle=cycle)
+			orders = models.Order.objects.filter(cycle=cycle).select_related().prefetch_related("orderitem_set", "orderitem_set__product", "orderitem_set__product__producer")
 	else:
 		form = OrderReportForm()
 		orders = models.Order.objects.filter(cycle=models.Cycle.getCurrentCycle())
