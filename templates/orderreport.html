@@ -15,6 +15,10 @@
 		<table>
 			<tr>
 				<td rowspan="999" style="width: 200px">
+					{% if order.delivered %}
+					<strong>Delivered</strong><br /><br />
+					{% endif %}
+					Order #{{order.id}}<br />
 					{{order.customer.get_full_name}}<br />
 					{{order.customer.get_profile.address1}}<br />
 					{% if order.customer.get_profile.address2 %}
@@ -23,18 +27,47 @@
 					{{order.customer.get_profile.city}}, {{order.customer.get_profile.state}}, {{order.customer.get_profile.zip}}
 				</td>
 				<th>Quantity</th>
-				<th>Product</th>
 				<th>Producer</th>
+				<th>Product</th>
+				<th>Price</th>
 			</tr>
 				{% for item in order.orderitem_set.all %}
 			<tr>
-						<td>{{item.quantity}}</td>
-						<td>{{item.product.name}}</td>
-						<td>{{item.product.producer}}</td>
+				<td>{{item.quantity}}</td>
+				<td>{{item.product.producer}}</td>
+				<td>{{item.product.name}}</td>
+				<td class="number-cell">{{item.price}}</td>
 			</tr>
 				{% endfor %}
+			<tr>
+				<td></td>
+				<td></td>
+				<td>Subtotal</td>
+				<td class="number-cell">{{order.subtotal}}</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>Tax</td>
+				<td class="number-cell">{{order.tax}}</td>
+			</tr>
+			{% if order.memberFee > 0 %}
+			<tr>
+				<td></td>
+				<td></td>
+				<td>Nonmember Fee</td>
+				<td class="number-cell">{{order.nonmemberfee}}</td>
+			</tr>
+			{% endif %}
+			<tr>
+				<td></td>
+				<td></td>
+				<td>Total</td>
+				<td class="number-cell">{{order.total}}</td>
+			</tr>
 		</table>
 		</div>
+		<br />
 			{% endif %}
 		{% endfor %}
 {% endblock %}

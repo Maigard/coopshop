@@ -140,6 +140,7 @@ hr {
 	border-radius:8px;
 	-moz-border-radius:8px; /* Firefox 3.6 and earlier */
 	overflow: hidden;
+	page-break-inside: avoid;
 }
 
 .category-bin {
@@ -336,8 +337,6 @@ background-color: white;
 	text-align: right;
 }
 
-
-
-	
-	
-	
+.number-cell {
+	text-align: right;
+}
