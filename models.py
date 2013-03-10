@@ -86,20 +86,8 @@ class Unit(models.Model):
 class Product(models.Model):
 	name		= models.CharField(max_length=64)
 	size		= models.DecimalField(max_digits=10,decimal_places=3, blank=True, null=True)
-	#unit		= models.CharField(max_length=32, blank=True, null=True, choices = (
-	#										("pound", "pound"),
-	#										("gallon", "gallon"),
-	#										("dozen", "dozen"),
-	#										("half dozen", "half dozen"),
-	#										("each", "each"),
-	#										("bundles", "bundles"),
-	#										("box", "box"),
-	#										("carton", "carton"),
-	#										("bag", "bag"),
-	#										("ounces", "ounces"),
-	#										("liters", "liters"),
-	#										("","")))
 	unit		= models.ForeignKey(Unit)
+	itemCode	= models.CharField(max_length=32, unique=True, null=True, blank=True, help_text="External item code.  Used for updating product information")
 	description	= models.TextField(help_text="Html and <a href='http://en.wikipedia.org/wiki/Markdown'>markdown</a> are allowed")
 	image		= ImageField(upload_to="products", blank=True, null=True, help_text="If an image is not provided, the category image will be used in its place")
 	category	= models.ForeignKey(Category)
