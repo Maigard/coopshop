@@ -48,6 +48,8 @@ class Producer(models.Model):
 	markup		= models.DecimalField(max_digits=10,decimal_places=3, blank=True, null=True)
 	leadTime	= models.IntegerField(default=0)
 
+	class Meta:
+		ordering = ["name"]
 	@models.permalink
 	def get_absolute_url(self):
 		return ('coopshop.views.producer', [str(self.id)])
@@ -86,19 +88,6 @@ class Unit(models.Model):
 class Product(models.Model):
 	name		= models.CharField(max_length=64)
 	size		= models.DecimalField(max_digits=10,decimal_places=3, blank=True, null=True)
-	#unit		= models.CharField(max_length=32, blank=True, null=True, choices = (
-	#										("pound", "pound"),
-	#										("gallon", "gallon"),
-	#										("dozen", "dozen"),
-	#										("half dozen", "half dozen"),
-	#										("each", "each"),
-	#										("bundles", "bundles"),
-	#										("box", "box"),
-	#										("carton", "carton"),
-	#										("bag", "bag"),
-	#										("ounces", "ounces"),
-	#										("liters", "liters"),
-	#										("","")))
 	unit		= models.ForeignKey(Unit)
 	description	= models.TextField(help_text="Html and <a href='http://en.wikipedia.org/wiki/Markdown'>markdown</a> are allowed")
 	image		= ImageField(upload_to="products", blank=True, null=True, help_text="If an image is not provided, the category image will be used in its place")
@@ -183,6 +172,9 @@ class Order(models.Model):
 	tax		= models.DecimalField(max_digits=10,decimal_places=2,blank=True)
 	total		= models.DecimalField(max_digits=10,decimal_places=2,blank=True)
 	cycle		= models.ForeignKey(Cycle)
+	paymentType	= models.CharField(max_length=16, blank=True, null=True, choices = (
+						("cash", "Cash"),
+						("credit", "Credit")))
 	paid		= models.BooleanField(default=False)
 	delivered	= models.BooleanField(default=False)
 	paymentId	= models.CharField(max_length=32,default=False, null=True)
@@ -195,62 +187,64 @@ class Order(models.Model):
 			raise ValidationError("Can't charge and order more than once")
 
 		self.update_totals()
-		stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
-		profile = self.customer.get_profile()
-        	customer = profile.stripeId
-		try:
-			charge = stripe.Charge.create(	amount=int(self.total*100),
-							currency="usd",
-							customer=customer)
-		except Esception, e:
-			raise ChargeError(e)
-		if charge:
-			memberItems = OrderItem.objects.filter(order = self.id, product__membershipPayment = True)
-			if len(memberItems) > 0:
-				profile = self.customer.get_profile()
-				profile.membershipBalance += sum([orderItem.price * orderItem.quantity for orderItem in memberItems])
-				try:
-					profile.membershipExpires += datetime.timedelta(days=sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems]))
-				except TypeError:
-					profile.membershipExpires = datetime.date.today() + datetime.timedelta(days=int(sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems])))
-				profile.save()
-			self.paid = True
-			self.paymentId = charge["id"]
-			self.processingFee = (Decimal(charge["fee"])/100).quantize(TWOPLACES)
+		if self.paymentType == "credit":
+			stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
+			profile = self.customer.get_profile()
+			customer = profile.stripeId
+			try:
+				charge = stripe.Charge.create(	amount=int(self.total*100),
+								currency="usd",
+								customer=customer)
+			except Esception, e:
+				raise ChargeError(e)
+			if charge:
+				memberItems = OrderItem.objects.filter(order = self.id, product__membershipPayment = True)
+				if len(memberItems) > 0:
+					profile = self.customer.get_profile()
+					profile.membershipBalance += sum([orderItem.price * orderItem.quantity for orderItem in memberItems])
+					try:
+						profile.membershipExpires += datetime.timedelta(days=sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems]))
+					except TypeError:
+						profile.membershipExpires = datetime.date.today() + datetime.timedelta(days=int(sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems])))
+					profile.save()
+				self.paid = True
+				self.paymentId = charge["id"]
+				self.processingFee = (Decimal(charge["fee"])/100).quantize(TWOPLACES)
 		self.save()
 
 	def fullRefund(self):
 		if not self.paid or self.paymentId == None:
 			raise ValidationError("Can't refund an order that hasn't been paid")
 
-		stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
-
-		try:
-			charge = stripe.Charge.retrieve(self.paymentId)
-			charge.refund()
-			self.paid = False
-			memberItems = OrderItem.objects.filter(order = self.id, product__membershipPayment = True)
-			if len(memberItems) > 0:
-				profile = self.customer.get_profile()
-				profile.membershipBalance -= sum([orderItem.price * orderItem.quantity for orderItem in memberItems])
-				profile.membershipExpires -= datetime.timedelta(days=sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems]))
-				profile.save()
-		except Exception, e:
-			raise ChargeError(e)
+		if self.paymentType == "credit":
+			stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
+			try:
+				charge = stripe.Charge.retrieve(self.paymentId)
+				charge.refund()
+				memberItems = OrderItem.objects.filter(order = self.id, product__membershipPayment = True)
+				if len(memberItems) > 0:
+					profile = self.customer.get_profile()
+					profile.membershipBalance -= sum([orderItem.price * orderItem.quantity for orderItem in memberItems])
+					profile.membershipExpires -= datetime.timedelta(days=sum([orderItem.product.membershipExtension * orderItem.quantity for orderItem in memberItems]))
+					profile.save()
+			except Exception, e:
+				raise ChargeError(e)
+		self.paid = False
 		self.save()
 
 	def refundDifference(self):
 		if not self.paid or self.paymentId == None:
 			raise ValidationError("Can't refund an order that hasn't been paid")
 
-		stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
-		try:
-			charge = stripe.Charge.retrieve(self.paymentId)
-			refundAmount = charge["amount"] - charge["amount_refunded"] - int(self.total * 100)
-			if refundAmount > 0:
-				charge.refund(amount = refundAmount)
-		except Exception, e:
-			raise ChargeError(e)
+		if self.paymentType == "credit":
+			stripe.api_key = Setting.objects.get(key="Stripe Secret Key").value
+			try:
+				charge = stripe.Charge.retrieve(self.paymentId)
+				refundAmount = charge["amount"] - charge["amount_refunded"] - int(self.total * 100)
+				if refundAmount > 0:
+					charge.refund(amount = refundAmount)
+			except Exception, e:
+				raise ChargeError(e)
 
 	def update_totals(self):
 		if not self.customer.get_profile().is_member() and OrderItem.objects.filter(order = self.id, product__membershipPayment = True).count() > 0:
@@ -288,6 +282,9 @@ class OrderItem(models.Model):
 	quantity	= models.DecimalField(max_digits=10,decimal_places=2)
 	wholesalePrice	= models.DecimalField(max_digits=10,decimal_places=2,blank=True)
 	price		= models.DecimalField(max_digits=10,decimal_places=2,blank=True)
+
+	class Meta:
+		ordering = ["product__producer"]
 
 	def save(self):
 		if self.wholesalePrice == None:
@@ -426,7 +423,7 @@ class AboutPage(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('coopshop.views.about', [self.title])
+		return ('coopshop.views.about', [self.slug])
 
 	def save(self):
 		if self.defaultPage:
