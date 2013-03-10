@@ -116,11 +116,11 @@ class ProductAdmin(AdminImageMixin, admin.ModelAdmin):
 			self.exclude.append('membershipExtension')
 			self.exclude.append('membershipPayment')
 			self.fieldsets = [ ("Basic Info", {"fields": ( "name", "description", "image", "category", "producer")}),
-				      ("Additional Info", {"fields": ( "size", "unit", "active", "leadTime", "unlimitedQuantity")}),
+				      ("Additional Info", {"fields": ( "size", "unit", "active", "leadTime", "unlimitedQuantity", "itemCode")}),
 				      ("Pricing", {"fields": ( "taxable", "wholesalePrice", "minimumPrice")})]
 		else:
 			self.fieldsets = [ ("Basic Info", {"fields": ( "name", "description", "image", "category", "producer")}),
-					("Additional Info", {"fields": ( "size", "unit", "active", "leadTime", "unlimitedQuantity")}),
+					("Additional Info", {"fields": ( "size", "unit", "active", "leadTime", "unlimitedQuantity", "itemCode")}),
 					("Pricing", {"fields": ( "taxable", "wholesalePrice", "markup", "minimumPrice")}),
 					("Membership", {"fields": ( "membershipPayment", "membershipExtension"), "classes": ["collapse"]})]
 		return super(ProductAdmin, self).get_form(request, obj, **kwargs)
