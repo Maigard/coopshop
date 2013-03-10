@@ -87,7 +87,7 @@ class Product(models.Model):
 	name		= models.CharField(max_length=64)
 	size		= models.DecimalField(max_digits=10,decimal_places=3, blank=True, null=True)
 	unit		= models.ForeignKey(Unit)
-	itemCode	= models.CharField(max_length=32, unique=True, null=True, blank=True, help_text="External item code.  Used for updating product information")
+	itemCode	= models.CharField(max_length=32, unique=True, null=True, blank=True, verbose_name="Item Code", help_text="External item code.  Used for updating product information")
 	description	= models.TextField(help_text="Html and <a href='http://en.wikipedia.org/wiki/Markdown'>markdown</a> are allowed")
 	image		= ImageField(upload_to="products", blank=True, null=True, help_text="If an image is not provided, the category image will be used in its place")
 	category	= models.ForeignKey(Category)
@@ -105,6 +105,32 @@ class Product(models.Model):
 	
 	class Meta:
 		ordering = ["name"]
+
+	@classmethod
+	def updateProducts(cls, productList):
+		products = dict([(product["itemCode"], product) for product in productList])
+		for dbproduct in cls.objects.filter(itemCode__in = products.keys()):
+			product = products[dbproduct.itemCode]
+			updated = False
+			if "wholesalePrice" in product and dbproduct.wholesalePrice != Decimal(product["wholesalePrice"]):
+				dbproduct.wholesalePrice = product["wholesalePrice"]
+				updated = True
+			if "minimumPrice" in product and dbproduct.minimumPrice != Decimal(product["minimumPrice"]):
+				dbproduct.minimumPrice = product["minimumPrice"]
+				updated = True
+			if "name" in product and dbproduct.name != product["name"][:cls._meta.get_field("name").max_length]:
+				dbproduct.name = product["name"][:cls._meta.get_field("name").max_length]
+				updated = True
+			if "quantity" in product:
+				try:
+					productCycle = ProductCycle.objects.get(cycle = Cycle.getCurrentCycle(), product = dbproduct)
+					if productCycle.quantity != int(product["quantity"]):
+						productCycle.quantity = int(product["quantity"])
+						productCycle.save()
+				except ProductCycle.DoesNotExist:
+					ProductCycle(cycle = Cycle.getCurrentCycle(), product = dbproduct, quantity = int(product["quantity"])).save()
+			if updated:
+				dbproduct.save()
 
 	def get_image(self):
 		if self.image:
