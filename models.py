@@ -124,13 +124,17 @@ class Product(models.Model):
 				dbproduct.name = product["name"][:cls._meta.get_field("name").max_length]
 				updated = True
 			if "quantity" in product:
-				try:
-					productCycle = ProductCycle.objects.get(cycle = Cycle.getCurrentCycle(), product = dbproduct)
-					if productCycle.quantity != int(product["quantity"]):
-						productCycle.quantity = int(product["quantity"])
-						productCycle.save()
-				except ProductCycle.DoesNotExist:
-					ProductCycle(cycle = Cycle.getCurrentCycle(), product = dbproduct, quantity = int(product["quantity"])).save()
+				if product["quantity"] == "unlimited":
+					dbproduct.unlimitedQuantity = True
+				else:
+					dbproduct.unlimitedQuantity = False
+					try:
+						productCycle = ProductCycle.objects.get(cycle = Cycle.getCurrentCycle(), product = dbproduct)
+						if productCycle.quantity != int(product["quantity"]):
+							productCycle.quantity = int(product["quantity"])
+							productCycle.save()
+					except ProductCycle.DoesNotExist:
+						ProductCycle(cycle = Cycle.getCurrentCycle(), product = dbproduct, quantity = int(product["quantity"])).save()
 			if updated:
 				dbproduct.save()
 
