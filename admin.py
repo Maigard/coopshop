@@ -74,13 +74,24 @@ class UnitAdmin(admin.ModelAdmin):
 admin.site.register(models.Unit, UnitAdmin)
 
 class ProductAdmin(AdminImageMixin, admin.ModelAdmin):
-	list_display = ('name', 'category', 'producer', 'wholesalePrice', 'site_price', 'taxable', 'active')
-	search_fields = ["name", "category__name"]
+	list_display = ('name', 'category', 'producer', 'wholesalePrice', 'site_price', 'quantity_remaining', 'taxable', 'active')
+	search_fields = ["name", "category__name", "itemCode"]
 	list_filter = ('category', 'producer', 'taxable', 'active')
 	ordering = ("name",)
 	actions = ("activate", "deactivate")
 	inlines = (ProductCycleInline,)
 
+	def product_quantity(self, instance):
+		if instance.unlimitedQuantity:
+			return "unlimited"
+		else:
+			return instance.get_quantity()
+
+	def quantity_remaining(self, instance):
+		if instance.unlimitedQuantity:
+			return "unlimited"
+		else:
+			return instance.get_remaining()
 
 	def site_price(self, instance):
 		return instance.get_price()
@@ -186,7 +197,7 @@ class OrderAdminForm(forms.ModelForm):
 
 class OrderAdmin(admin.ModelAdmin):
 	list_display = ('id', 'customer', 'fullname', 'date', 'total', 'paid', 'delivered')
-	readonly_fields = ('subtotal', 'tax', 'total', 'processingFee', 'paymentId', 'paid', 'date')
+	readonly_fields = ('subtotal', 'tax', 'total', 'processingFee', 'paymentId', 'date')
 	inlines = (OrderItemInline,)
 	list_filter = ('date', 'paid', 'delivered')
 	actions = ("delivered", "refund", "charge")
