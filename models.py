@@ -11,6 +11,16 @@ import stripe
 
 TWOPLACES=Decimal(10) ** -2
 
+class NullableCharField(models.CharField):
+	description = "CharField that obeys null=True"
+	def to_python(self, value):
+		if isinstance(value, models.CharField):
+			return value
+		return value or ""
+
+	def get_db_prep_value(self, value, connection, prepared=False):
+		return value or None
+
 class CycleException(Exception):
 	pass
 
@@ -89,7 +99,8 @@ class Product(models.Model):
 	name		= models.CharField(max_length=64)
 	size		= models.DecimalField(max_digits=10,decimal_places=3, blank=True, null=True)
 	unit		= models.ForeignKey(Unit)
-	itemCode	= models.CharField(max_length=32, unique=True, null=True, blank=True, verbose_name="Item Code", help_text="External item code.  Used for updating product information")
+	#itemCode	= NullableCharField(max_length=32, unique=True, null=True, blank=True, verbose_name="Item Code", help_text="External item code.  Used for updating product information")
+	itemCode	= NullableCharField(max_length=32, unique=True, null=True, blank=True, verbose_name="Item Code", help_text="External item code.  Used for updating product information")
 	description	= models.TextField(help_text="Html and <a href='http://en.wikipedia.org/wiki/Markdown'>markdown</a> are allowed")
 	image		= ImageField(upload_to="products", blank=True, null=True, help_text="If an image is not provided, the category image will be used in its place")
 	category	= models.ForeignKey(Category)
