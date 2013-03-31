@@ -177,7 +177,7 @@ def search(request):
 	products = None
 	if ('q' in request.GET) and request.GET['q'].strip():
 		query_string = request.GET['q']
-        	entry_query = get_query(query_string, ['name', 'description'])
+        	entry_query = get_query(query_string, ['name', 'description', 'itemCode'])
         	product_list = models.Product.objects.filter(entry_query)
         	paginator = Paginator(product_list,20)
 		page = request.GET.get("page")
@@ -323,7 +323,7 @@ def charge(request):
 		except KeyError:
 			raise Http404 #TODO this shouldn't be a 404
 
-		order = models.Order(customer=request.user, cycle=models.Cycle.getCurrentCycle())
+		order = models.Order(customer=request.user, cycle=models.Cycle.getCurrentCycle(), paymentType="credit")
 		order.save()
 
 		items = []
@@ -382,7 +382,7 @@ def orderReport(request):
 				cycle = models.Cycle.getCurrentCycle()
 			else:
 				cycle = form.cleaned_data["cycle"]
-			orders = models.Order.objects.filter(cycle=cycle).select_related().prefetch_related("orderitem_set", "orderitem_set__product", "orderitem_set__product__producer")
+			orders = models.Order.objects.filter(cycle=cycle).select_related().prefetch_related("orderitem_set", "orderitem_set__product", "orderitem_set__product__producer").order_by("customer")
 	else:
 		form = OrderReportForm()
 		orders = models.Order.objects.filter(cycle=models.Cycle.getCurrentCycle())
@@ -423,7 +423,7 @@ def producerReport(request):
 			products = {}
 			totals = {}
 			totalcost = 0
-			columnHeaders = ["Quantity", "Product", "Wholesale"]
+			columnHeaders = ["Quantity", "Item Code", "Product", "Wholesale"]
 			displayedOrders = set()
 			items = {}
 			for order in orders:
@@ -434,19 +434,21 @@ def producerReport(request):
 						sectionHeader.append(profile.address2)
 					sectionHeader.append("%s, %s, %s" % (profile.city, profile.state, profile.zip))
 					orderItems = models.OrderItem.objects.filter(order = order, product__producer = filters["products__producer"])
-					entries = [[orderItem.quantity, orderItem.product.name, (orderItem.quantity * orderItem.wholesalePrice).quantize(TWOPLACES),] for orderItem in orderItems]
-					entries.append(["", "Total", sum([i[2] for i in entries])])
+					entries = [[orderItem.quantity, orderItem.product.itemCode, orderItem.product.name, (orderItem.quantity * orderItem.wholesalePrice).quantize(TWOPLACES),] for orderItem in orderItems]
+					entries.append(["", "", "Total", sum([i[3] for i in entries])])
 					sections.append({"sectionHeader": sectionHeader, "columnHeaders": columnHeaders, "entries": entries})
 					displayedOrders.add(order)
 					for orderItem in orderItems:
 						try:
 							items[orderItem.product]["quantity"] += orderItem.quantity
 							items[orderItem.product]["wholesalePrice"] += (orderItem.quantity * orderItem.wholesalePrice).quantize(TWOPLACES)
+							items[orderItem.product]["itemCode"] = orderItem.product.itemCode
 						except KeyError:
 							items[orderItem.product] = {	"wholesalePrice": (orderItem.wholesalePrice * orderItem.quantity).quantize(TWOPLACES),
-											"quantity": orderItem.quantity}
-			items = [(value["quantity"], key.name, value["wholesalePrice"]) for (key, value) in items.iteritems()]
-			items.append(["", "Total", sum([item[2] for item in items])])
+											"quantity": orderItem.quantity,
+											"itemCode": orderItem.product.itemCode}
+			items = [(value["quantity"], value["itemCode"], key.name, value["wholesalePrice"]) for (key, value) in items.iteritems()]
+			items.append(["", "", "Total", sum([item[3] for item in items])])
 			sections.append({"sectionHeader": ["Totals"], "columnHeaders": columnHeaders, "entries": items})
 	else:
 		form = ProducerReportForm(groups)
