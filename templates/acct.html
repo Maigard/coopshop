@@ -37,6 +37,7 @@
         <h3> Order History </h3>
         <table><!-- class="youraccount" > -->
         	<thead>
+            	<td><strong>Order Number</strong></td>
             	<td><strong>Order Date</strong></td>
                 <td><strong>Order Total</strong></td>
                 <td><strong>Charged</strong></td>
@@ -45,7 +46,8 @@
 	{%for order in orders %}
              <tr>
 		
-             	<td><a href='{% url coopshop.views.order order.id %}'>{{order.date}}</a></td>
+             	<td><a href='{% url coopshop.views.order order.id %}'>{{order.id}}</a></td>
+             	<td>{{order.date}}</td>
                 <td>${{order.total}}</td>
                 <td>{% if order.paid %}Yes{% else %}No{% endif %}</td>
                 <td>{% if order.delivered %}Yes{% else %}No{% endif %}</td>
