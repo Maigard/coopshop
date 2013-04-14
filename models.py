@@ -121,9 +121,9 @@ class Product(models.Model):
 
 	@classmethod
 	def updateProducts(cls, productList):
-		products = dict([(product["itemCode"], product) for product in productList])
+		products = dict([(product["itemCode"].upper(), product) for product in productList])
 		for dbproduct in cls.objects.filter(itemCode__in = products.keys()):
-			product = products[dbproduct.itemCode]
+			product = products[dbproduct.itemCode.upper()]
 			updated = False
 			if "wholesalePrice" in product and dbproduct.wholesalePrice != Decimal(product["wholesalePrice"]):
 				dbproduct.wholesalePrice = product["wholesalePrice"]
